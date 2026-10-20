@@ -6,269 +6,217 @@
 <title>Mon Vocabulaire — French Flashcards</title>
 <style>
   :root {
-    --bg: #0f1419;
-    --card-bg: #1c2430;
-    --accent: #5b8def;
-    --accent2: #4a9d6f;
-    --danger: #e0556f;
-    --text: #e8ecf1;
-    --muted: #8a93a3;
-    --radius: 16px;
+    --bg: #0b0e14;
+    --bg2: #11151e;
+    --card-bg: #1a2030;
+    --accent: #6c8bff;
+    --accent2: #35c48f;
+    --warn: #f5b942;
+    --danger: #ef5876;
+    --text: #eef1f7;
+    --muted: #8893a8;
+    --radius: 18px;
   }
-  * { box-sizing: border-box; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
-    padding-bottom: 80px;
+    padding-bottom: 90px;
   }
-  header {
-    padding: 20px 16px 12px;
-    text-align: center;
-  }
-  header h1 {
-    font-size: 1.4em;
-    margin: 0 0 4px;
-  }
-  header .sub {
-    color: var(--muted);
-    font-size: 0.85em;
-  }
-  nav {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    padding: 0 16px 16px;
-    flex-wrap: wrap;
-  }
-  nav button {
-    background: var(--card-bg);
-    color: var(--text);
-    border: 1px solid #2a3542;
-    padding: 8px 16px;
-    border-radius: 999px;
-    font-size: 0.9em;
-    cursor: pointer;
-  }
-  nav button.active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #fff;
-  }
-  main {
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 0 16px;
-  }
+  header { padding: 22px 16px 10px; text-align: center; }
+  header h1 { font-size: 1.3em; margin: 0 0 2px; letter-spacing: 0.2px; }
+  header .sub { color: var(--muted); font-size: 0.8em; }
+  main { max-width: 480px; margin: 0 auto; padding: 0 16px; }
   .screen { display: none; }
-  .screen.active { display: block; }
+  .screen.active { display: block; animation: fadein 0.2s ease; }
+  @keyframes fadein { from{opacity:0} to{opacity:1} }
 
-  /* STUDY SCREEN */
-  .unit-picker {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    padding-bottom: 12px;
-    margin-bottom: 8px;
+  .tabbar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--bg2); border-top: 1px solid #20283a;
+    display: flex; padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); z-index: 50;
   }
+  .tabbar button {
+    flex: 1; background: none; border: none; color: var(--muted); font-size: 0.68em;
+    padding: 8px 2px 4px; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer;
+  }
+  .tabbar button .ic { font-size: 1.3em; }
+  .tabbar button.active { color: var(--accent); }
+
+  .hero-ring-wrap { display: flex; justify-content: center; margin: 10px 0 18px; }
+  .hero-ring { position: relative; width: 160px; height: 160px; }
+  .hero-ring svg { transform: rotate(-90deg); }
+  .hero-ring .center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .hero-ring .center .n { font-size: 2em; font-weight: 700; }
+  .hero-ring .center .l { font-size: 0.7em; color: var(--muted); }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; }
+  .stat-box { background: var(--card-bg); border-radius: 14px; padding: 14px 8px; text-align: center; }
+  .stat-box .v { font-size: 1.4em; font-weight: 700; }
+  .stat-box .l { font-size: 0.68em; color: var(--muted); margin-top: 2px; }
+  .stat-box.new .v { color: var(--danger); }
+  .stat-box.learning .v { color: var(--warn); }
+  .stat-box.mastered .v { color: var(--accent2); }
+
+  .streak-banner {
+    background: linear-gradient(135deg, #2a2350, #1a2030);
+    border-radius: 14px; padding: 14px 16px; margin-bottom: 18px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .streak-banner .flame { font-size: 1.6em; }
+  .streak-banner .txt { font-size: 0.85em; color: var(--muted); }
+  .streak-banner .num { font-size: 1.3em; font-weight: 700; }
+
+  .section-title { font-size: 0.8em; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 18px 0 8px; }
+  .unit-bar-row { margin-bottom: 10px; }
+  .unit-bar-row .top { display: flex; justify-content: space-between; font-size: 0.82em; margin-bottom: 4px; }
+  .unit-bar-row .top .pct { color: var(--muted); }
+  .bar-track { height: 8px; background: #222a3a; border-radius: 6px; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--accent2); border-radius: 6px; }
+  .cta-btn {
+    width: 100%; padding: 16px; background: var(--accent); color: #fff; border: none;
+    border-radius: 14px; font-size: 1em; font-weight: 700; cursor: pointer; margin-top: 6px;
+  }
+  .cta-btn.secondary { background: var(--card-bg); color: var(--text); border: 1px solid #2a3542; }
+
+  .unit-picker { display: flex; gap: 8px; overflow-x: auto; padding: 10px 0 12px; margin-bottom: 4px; }
   .unit-chip {
-    flex: 0 0 auto;
-    background: var(--card-bg);
-    border: 1px solid #2a3542;
-    color: var(--muted);
-    padding: 6px 14px;
-    border-radius: 999px;
-    font-size: 0.8em;
-    cursor: pointer;
-    white-space: nowrap;
+    flex: 0 0 auto; background: var(--card-bg); border: 1px solid #2a3542; color: var(--muted);
+    padding: 6px 14px; border-radius: 999px; font-size: 0.78em; cursor: pointer; white-space: nowrap;
   }
-  .unit-chip.active {
-    background: var(--accent2);
-    color: #fff;
-    border-color: var(--accent2);
-  }
-  .stats-row {
-    display: flex;
-    justify-content: space-between;
-    color: var(--muted);
-    font-size: 0.85em;
-    margin-bottom: 14px;
-  }
+  .unit-chip.active { background: var(--accent2); color: #0b0e14; border-color: var(--accent2); font-weight: 700; }
+  .progress-track { height: 6px; background: #222a3a; border-radius: 4px; margin-bottom: 14px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.25s; }
   .card {
-    background: var(--card-bg);
-    border-radius: var(--radius);
-    padding: 40px 24px;
-    min-height: 220px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    cursor: pointer;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    transition: transform 0.15s;
+    background: var(--card-bg); border-radius: var(--radius); padding: 36px 22px; min-height: 220px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+    cursor: pointer; box-shadow: 0 8px 28px rgba(0,0,0,0.35); position: relative;
   }
-  .card:active { transform: scale(0.98); }
-  .card .unit-tag {
-    position: absolute;
-    top: 14px;
-    left: 20px;
-    font-size: 0.7em;
-    color: var(--muted);
+  .card .unit-tag { position: absolute; top: 14px; left: 20px; font-size: 0.68em; color: var(--muted); }
+  .card .verb-tag {
+    position: absolute; top: 14px; right: 20px; font-size: 0.65em;
+    background: #2a3550; color: #9fb4ff; padding: 2px 8px; border-radius: 999px;
   }
-  .card-wrap { position: relative; }
-  .card .word {
-    font-size: 1.8em;
-    font-weight: 600;
-    margin-bottom: 8px;
-  }
-  .card .hint {
-    color: var(--muted);
-    font-size: 0.8em;
-  }
-  .card .translation {
-    font-size: 1.3em;
-    color: var(--accent);
-    margin-bottom: 10px;
-    font-weight: 600;
-  }
-  .card .example {
-    color: var(--muted);
-    font-size: 0.95em;
-    font-style: italic;
-  }
-  .grade-row {
-    display: flex;
-    gap: 10px;
-    margin-top: 16px;
-  }
-  .grade-row button {
-    flex: 1;
-    padding: 14px 0;
-    border: none;
-    border-radius: 12px;
-    font-size: 0.95em;
-    font-weight: 600;
-    cursor: pointer;
-    color: #fff;
-  }
-  .grade-row .again { background: var(--danger); }
-  .grade-row .good { background: var(--accent); }
+  .card .word { font-size: 1.7em; font-weight: 700; margin-bottom: 8px; }
+  .card .hint { color: var(--muted); font-size: 0.78em; }
+  .card .translation { font-size: 1.25em; color: var(--accent); margin-bottom: 10px; font-weight: 700; }
+  .card .example { color: var(--muted); font-size: 0.92em; font-style: italic; }
+  .grade-row { display: flex; gap: 10px; margin-top: 16px; }
+  .grade-row button { flex: 1; padding: 15px 0; border: none; border-radius: 14px; font-size: 0.92em; font-weight: 700; cursor: pointer; color: #0b0e14; }
+  .grade-row .again { background: var(--danger); color: #fff; }
+  .grade-row .good { background: var(--accent); color: #fff; }
   .grade-row .easy { background: var(--accent2); }
-  .empty-state {
-    text-align: center;
-    color: var(--muted);
-    padding: 60px 20px;
-  }
+  .empty-state { text-align: center; color: var(--muted); padding: 60px 20px; }
   .empty-state .big { font-size: 3em; margin-bottom: 10px; }
 
-  /* MANAGE SCREEN */
-  .form-box {
-    background: var(--card-bg);
-    border-radius: var(--radius);
-    padding: 16px;
-    margin-bottom: 16px;
+  .verb-row { background: var(--card-bg); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; cursor: pointer; }
+  .verb-row .vhead { display: flex; justify-content: space-between; align-items: center; }
+  .verb-row .vword { font-weight: 700; font-size: 1.05em; }
+  .verb-row .vtrans { color: var(--muted); font-size: 0.85em; }
+  .verb-row .vexpand { color: var(--muted); }
+  .conj-table-wrap { margin-top: 12px; overflow-x: auto; display: none; }
+  .verb-row.open .conj-table-wrap { display: block; }
+  .conj-table { border-collapse: collapse; width: 100%; font-size: 0.78em; }
+  .conj-table th, .conj-table td { padding: 5px 8px; text-align: left; white-space: nowrap; border-bottom: 1px solid #222a3a; }
+  .conj-table th { color: var(--muted); font-weight: 600; position: sticky; top: 0; }
+  .conj-table td.pronoun { color: var(--muted); }
+  .quiz-box { background: var(--card-bg); border-radius: 14px; padding: 18px; text-align: center; margin-bottom: 16px; }
+  .quiz-box .prompt { font-size: 1.1em; margin-bottom: 4px; }
+  .quiz-box .prompt b { color: var(--accent); }
+  .quiz-box .tense-label { font-size: 0.75em; color: var(--muted); margin-bottom: 12px; }
+  .quiz-box input {
+    width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #2a3542;
+    background: #141a22; color: var(--text); font-size: 1em; text-align: center; margin-bottom: 10px;
   }
-  .form-box input, .form-box select {
-    width: 100%;
-    padding: 10px 12px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    border: 1px solid #2a3542;
-    background: #141a22;
-    color: var(--text);
-    font-size: 0.95em;
+  .quiz-box .result { font-size: 0.9em; margin-bottom: 10px; min-height: 1.2em; }
+  .quiz-box .result.correct { color: var(--accent2); }
+  .quiz-box .result.wrong { color: var(--danger); }
+
+  .form-box { background: var(--card-bg); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
+  .form-box h4 { margin: 0 0 10px; font-size: 0.9em; color: var(--muted); font-weight: 600; }
+  .form-box input, .form-box select, .form-box textarea {
+    width: 100%; padding: 10px 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #2a3542;
+    background: #141a22; color: var(--text); font-size: 0.95em; font-family: inherit;
   }
-  .form-box button {
-    width: 100%;
-    padding: 12px;
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-  }
+  .form-box textarea { min-height: 100px; resize: vertical; }
+  .form-box .hint-txt { color: var(--muted); font-size: 0.78em; margin: -4px 0 10px; }
+  .form-box button { width: 100%; padding: 12px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; }
   .word-list { margin-top: 10px; }
   .unit-section { margin-bottom: 18px; }
-  .unit-section h3 {
-    font-size: 0.9em;
-    color: var(--muted);
-    border-bottom: 1px solid #2a3542;
-    padding-bottom: 6px;
-  }
-  .word-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid #1c2430;
-  }
+  .unit-section h3 { font-size: 0.85em; color: var(--muted); border-bottom: 1px solid #2a3542; padding-bottom: 6px; }
+  .word-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #1c2430; }
   .word-row .w { font-weight: 600; }
-  .word-row .t { color: var(--muted); font-size: 0.85em; }
-  .word-row .del {
-    background: none;
-    border: none;
-    color: var(--danger);
-    font-size: 1.1em;
-    cursor: pointer;
-    padding: 4px 8px;
-  }
-  .level-badge {
-    font-size: 0.65em;
-    padding: 2px 6px;
-    border-radius: 6px;
-    background: #2a3542;
-    color: var(--muted);
-    margin-left: 6px;
-  }
-  .toolbar {
-    display: flex;
-    gap: 8px;
-    margin: 10px 0 20px;
-  }
-  .toolbar button {
-    flex: 1;
-    padding: 10px;
-    background: var(--card-bg);
-    color: var(--text);
-    border: 1px solid #2a3542;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.85em;
-  }
-  #importFile { display: none; }
+  .word-row .t { color: var(--muted); font-size: 0.82em; }
+  .word-row .del { background: none; border: none; color: var(--danger); font-size: 1.1em; cursor: pointer; padding: 4px 8px; }
+  .level-badge { font-size: 0.62em; padding: 2px 6px; border-radius: 6px; background: #2a3542; color: var(--muted); margin-left: 6px; }
+  .source-badge { font-size: 0.6em; padding: 1px 6px; border-radius: 6px; margin-left: 6px; background: #1f3a2d; color: var(--accent2); }
 </style>
 </head>
 <body>
 
 <header>
   <h1>🇫🇷 Mon Vocabulaire</h1>
-  <div class="sub">Your B1 flashcards, organized by unit</div>
+  <div class="sub">B1 flashcards · verbs · progress</div>
 </header>
-
-<nav>
-  <button class="active" data-screen="study">Study</button>
-  <button data-screen="manage">Manage</button>
-</nav>
 
 <main>
 
-  <!-- STUDY SCREEN -->
-  <div class="screen active" id="screen-study">
-    <div class="unit-picker" id="unitPicker"></div>
-    <div class="stats-row">
-      <span id="dueCount">0 due</span>
-      <span id="totalCount">0 total</span>
+  <div class="screen active" id="screen-home">
+    <div class="hero-ring-wrap">
+      <div class="hero-ring">
+        <svg width="160" height="160">
+          <circle cx="80" cy="80" r="68" stroke="#222a3a" stroke-width="14" fill="none"/>
+          <circle id="ringFill" cx="80" cy="80" r="68" stroke="#6c8bff" stroke-width="14" fill="none"
+                  stroke-dasharray="427" stroke-dashoffset="427" stroke-linecap="round"/>
+        </svg>
+        <div class="center">
+          <div class="n" id="ringPct">0%</div>
+          <div class="l">mastered</div>
+        </div>
+      </div>
     </div>
+
+    <div class="stat-grid">
+      <div class="stat-box new"><div class="v" id="statNew">0</div><div class="l">New</div></div>
+      <div class="stat-box learning"><div class="v" id="statLearning">0</div><div class="l">Learning</div></div>
+      <div class="stat-box mastered"><div class="v" id="statMastered">0</div><div class="l">Mastered</div></div>
+    </div>
+
+    <div class="streak-banner">
+      <div>
+        <div class="txt">Current streak</div>
+        <div class="num" id="streakNum">0 days</div>
+      </div>
+      <div class="flame">🔥</div>
+    </div>
+
+    <button class="cta-btn" id="goStudyBtn">Study now (<span id="dueCountHome">0</span> due)</button>
+    <button class="cta-btn secondary" id="goGrammarBtn" style="margin-top:8px;">Practice verb conjugation</button>
+
+    <div class="section-title">Progress by unit</div>
+    <div id="unitProgressList"></div>
+  </div>
+
+  <div class="screen" id="screen-study">
+    <div class="unit-picker" id="unitPicker"></div>
+    <div class="progress-track"><div class="progress-fill" id="sessionProgress" style="width:0%"></div></div>
     <div id="studyArea"></div>
   </div>
 
-  <!-- MANAGE SCREEN -->
+  <div class="screen" id="screen-grammar">
+    <div class="section-title">Verb conjugation quiz</div>
+    <div class="quiz-box" id="quizBox"></div>
+
+    <div class="section-title">All verbs</div>
+    <div id="verbList"></div>
+  </div>
+
   <div class="screen" id="screen-manage">
     <div class="form-box">
+      <h4>Quick add (one line)</h4>
       <input type="text" id="newUnit" placeholder="Unit (e.g. Unit 3 - Le temps libre)" list="unitList">
       <datalist id="unitList"></datalist>
       <input type="text" id="newWord" placeholder="French word/phrase">
@@ -276,142 +224,154 @@
       <input type="text" id="newExample" placeholder="Example sentence (French)">
       <button id="addWordBtn">+ Add word</button>
     </div>
-    <div class="toolbar">
-      <button id="exportBtn">⬇ Export backup</button>
-      <button id="importBtn">⬆ Import backup</button>
-      <input type="file" id="importFile" accept="application/json">
+
+    <div class="form-box">
+      <h4>Bulk paste</h4>
+      <div class="hint-txt">One word per line: <code>mot - traduction - exemple</code> (example is optional)</div>
+      <input type="text" id="bulkUnit" placeholder="Unit for this batch" list="unitList">
+      <textarea id="bulkText" placeholder="fatigué - tired - Je suis fatigué ce soir.&#10;ennuyeux - annoying"></textarea>
+      <button id="bulkAddBtn">+ Add batch</button>
     </div>
+
     <div class="word-list" id="wordList"></div>
   </div>
 
 </main>
 
-<script>
-const STORAGE_KEY = 'french_flashcards_v1';
+<nav class="tabbar">
+  <button class="active" data-screen="home"><span class="ic">🏠</span>Home</button>
+  <button data-screen="study"><span class="ic">📇</span>Study</button>
+  <button data-screen="grammar"><span class="ic">🧩</span>Grammar</button>
+  <button data-screen="manage"><span class="ic">➕</span>Add / Manage</button>
+</nav>
 
-// ---- Simple SRS: box system, simpler than Anki ----
-// level 0 -> due immediately / same session
-// level 1 -> +1 day
-// level 2 -> +3 days
-// level 3 -> +7 days
-// level 4 -> +16 days
-// level 5+ -> +30 days (mastered, capped)
+<script src="conjugate.js"></script>
+<script>
+const STORAGE_SRS = 'ffc_srs_v2';
+const STORAGE_LOCAL_WORDS = 'ffc_local_words_v2';
+const STORAGE_HIDDEN = 'ffc_hidden_v2';
+const STORAGE_STREAK = 'ffc_streak_v2';
+
 const INTERVALS = [0, 1, 3, 7, 16, 30];
 
-function todayStr() {
-  return new Date().toISOString().slice(0,10);
-}
+function todayStr() { return new Date().toISOString().slice(0,10); }
 function addDays(dateStr, days) {
   const d = new Date(dateStr + 'T00:00:00');
   d.setDate(d.getDate() + days);
   return d.toISOString().slice(0,10);
 }
-
-// ---- Seed data: basic B1 French vocab across units ----
-const SEED = [
-  // Unit 1 - La vie quotidienne (daily life)
-  ["Unit 1 - La vie quotidienne","se réveiller","to wake up","Je me réveille à sept heures chaque matin."],
-  ["Unit 1 - La vie quotidienne","le quotidien","daily life / routine","Le quotidien peut devenir monotone."],
-  ["Unit 1 - La vie quotidienne","faire les courses","to go grocery shopping","Nous faisons les courses le samedi."],
-  ["Unit 1 - La vie quotidienne","se dépêcher","to hurry","Dépêche-toi, on va être en retard !"],
-  ["Unit 1 - La vie quotidienne","l'emploi du temps","schedule / timetable","Mon emploi du temps est très chargé cette semaine."],
-  ["Unit 1 - La vie quotidienne","s'habituer à","to get used to","Je me suis habitué à me lever tôt."],
-  ["Unit 1 - La vie quotidienne","le quartier","neighbourhood","J'adore le quartier où j'habite."],
-  ["Unit 1 - La vie quotidienne","davantage","more / further","Il faut davantage de temps pour finir."],
-
-  // Unit 2 - Les études et le travail (studies and work)
-  ["Unit 2 - Les études et le travail","le stage","internship","Elle fait un stage dans une entreprise suisse."],
-  ["Unit 2 - Les études et le travail","réussir un examen","to pass an exam","J'espère réussir mon examen de français."],
-  ["Unit 2 - Les études et le travail","poursuivre des études","to continue studying","Il va poursuivre ses études à l'université."],
-  ["Unit 2 - Les études et le travail","embaucher","to hire","L'entreprise va embaucher dix nouveaux employés."],
-  ["Unit 2 - Les études et le travail","un entretien d'embauche","job interview","J'ai un entretien d'embauche demain matin."],
-  ["Unit 2 - Les études et le travail","le salaire","salary","Le salaire proposé est correct."],
-  ["Unit 2 - Les études et le travail","bénévole","volunteer (adj/noun)","Elle travaille comme bénévole dans une association."],
-  ["Unit 2 - Les études et le travail","épanouissant","fulfilling","C'est un métier très épanouissant."],
-
-  // Unit 3 - L'environnement (environment)
-  ["Unit 3 - L'environnement","le réchauffement climatique","global warming","Le réchauffement climatique inquiète les scientifiques."],
-  ["Unit 3 - L'environnement","gaspiller","to waste","Il ne faut pas gaspiller l'eau."],
-  ["Unit 3 - L'environnement","les déchets","waste / rubbish","Nous devons réduire nos déchets."],
-  ["Unit 3 - L'environnement","durable","sustainable","Le développement durable est essentiel."],
-  ["Unit 3 - L'environnement","une empreinte carbone","carbon footprint","Réduire son empreinte carbone est possible."],
-  ["Unit 3 - L'environnement","recycler","to recycle","On recycle le verre et le papier."],
-  ["Unit 3 - L'environnement","la pénurie","shortage","Il y a une pénurie d'eau dans certaines régions."],
-  ["Unit 3 - L'environnement","sensibiliser","to raise awareness","Il faut sensibiliser les jeunes à l'écologie."],
-
-  // Unit 4 - Les voyages et les vacances (travel and holidays)
-  ["Unit 4 - Les voyages et les vacances","un hébergement","accommodation","Nous cherchons un hébergement pas cher."],
-  ["Unit 4 - Les voyages et les vacances","le dépaysement","change of scenery","Voyager offre un vrai dépaysement."],
-  ["Unit 4 - Les voyages et les vacances","un séjour","stay / trip","Notre séjour à Paris était inoubliable."],
-  ["Unit 4 - Les voyages et les vacances","à l'étranger","abroad","Elle a étudié un an à l'étranger."],
-  ["Unit 4 - Les voyages et les vacances","un itinéraire","itinerary / route","Nous avons préparé un itinéraire détaillé."],
-  ["Unit 4 - Les voyages et les vacances","profiter de","to make the most of","Profitons de ce beau temps !"],
-  ["Unit 4 - Les voyages et les vacances","une auberge de jeunesse","youth hostel","On a dormi dans une auberge de jeunesse."],
-  ["Unit 4 - Les voyages et les vacances","dépayser","to give a change of scenery","Ce voyage va nous dépayser complètement."],
-
-  // Unit 5 - La santé et le bien-être (health and wellbeing)
-  ["Unit 5 - La santé et le bien-être","le stress","stress","Le stress affecte beaucoup d'étudiants."],
-  ["Unit 5 - La santé et le bien-être","se détendre","to relax","J'aime me détendre en lisant un livre."],
-  ["Unit 5 - La santé et le bien-être","une alimentation équilibrée","balanced diet","Il est important d'avoir une alimentation équilibrée."],
-  ["Unit 5 - La santé et le bien-être","faire du sport","to do sport / exercise","Je fais du sport trois fois par semaine."],
-  ["Unit 5 - La santé et le bien-être","le sommeil","sleep","Le manque de sommeil est mauvais pour la santé."],
-  ["Unit 5 - La santé et le bien-être","soigner","to treat / take care of","Le médecin va soigner sa blessure."],
-  ["Unit 5 - La santé et le bien-être","épuisé","exhausted","Après le marathon, il était complètement épuisé."],
-  ["Unit 5 - La santé et le bien-être","prendre soin de soi","to take care of oneself","Il faut prendre soin de soi, surtout en période d'examens."],
-
-  // Unit 6 - La technologie et les médias (technology and media)
-  ["Unit 6 - La technologie et les médias","un réseau social","social network","Beaucoup de jeunes passent du temps sur les réseaux sociaux."],
-  ["Unit 6 - La technologie et les médias","la vie privée","privacy","Il faut protéger sa vie privée en ligne."],
-  ["Unit 6 - La technologie et les médias","télécharger","to download","J'ai téléchargé une nouvelle application."],
-  ["Unit 6 - La technologie et les médias","un outil","a tool","Internet est un outil puissant pour apprendre."],
-  ["Unit 6 - La technologie et les médias","méfiant","wary / distrustful","Il faut être méfiant face aux fausses informations."],
-  ["Unit 6 - La technologie et les médias","un influenceur","influencer","Certains jeunes rêvent de devenir influenceurs."],
-  ["Unit 6 - La technologie et les médias","la désinformation","misinformation","La désinformation se propage vite en ligne."],
-  ["Unit 6 - La technologie et les médias","un avantage / un inconvénient","advantage / disadvantage","Chaque technologie a ses avantages et ses inconvénients."]
-];
-
-function seedData() {
-  const now = todayStr();
-  return SEED.map((row, i) => ({
-    id: 'seed-' + i,
-    unit: row[0],
-    word: row[1],
-    translation: row[2],
-    example: row[3],
-    level: 0,
-    nextReview: now
-  }));
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function stripAccents(s) {
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 }
 
-function loadData() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (raw) {
-    try { return JSON.parse(raw); } catch(e) { /* fall through */ }
+let remoteWords = [];
+let localWords = JSON.parse(localStorage.getItem(STORAGE_LOCAL_WORDS) || '[]');
+let srs = JSON.parse(localStorage.getItem(STORAGE_SRS) || '{}');
+let hidden = new Set(JSON.parse(localStorage.getItem(STORAGE_HIDDEN) || '[]'));
+let streak = JSON.parse(localStorage.getItem(STORAGE_STREAK) || '{"lastDate":null,"count":0}');
+
+function saveSrs() { localStorage.setItem(STORAGE_SRS, JSON.stringify(srs)); }
+function saveLocalWords() { localStorage.setItem(STORAGE_LOCAL_WORDS, JSON.stringify(localWords)); }
+function saveHidden() { localStorage.setItem(STORAGE_HIDDEN, JSON.stringify(Array.from(hidden))); }
+function saveStreak() { localStorage.setItem(STORAGE_STREAK, JSON.stringify(streak)); }
+
+function allWords() {
+  const combined = remoteWords.concat(localWords);
+  return combined.filter(w => !hidden.has(w.id));
+}
+
+function ensureSrs(id) {
+  if (!srs[id]) srs[id] = { level: 0, nextReview: todayStr() };
+  return srs[id];
+}
+
+async function loadRemoteWords() {
+  try {
+    const res = await fetch('./data/words.json', {cache: 'no-store'});
+    if (res.ok) remoteWords = await res.json();
+  } catch(e) {
+    console.warn('Could not fetch remote words.json', e);
   }
-  const seeded = seedData();
-  saveData(seeded);
-  return seeded;
-}
-function saveData(data) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
-let words = loadData();
+function bumpStreak() {
+  const today = todayStr();
+  if (streak.lastDate === today) return;
+  const yesterday = addDays(today, -1);
+  if (streak.lastDate === yesterday) streak.count += 1;
+  else streak.count = 1;
+  streak.lastDate = today;
+  saveStreak();
+}
+
+function getVerbInfo(word) {
+  return window.FrenchConjugate ? window.FrenchConjugate.analyze(word) : null;
+}
+
+function renderDashboard() {
+  const words = allWords();
+  const today = todayStr();
+  let nNew = 0, nLearning = 0, nMastered = 0, nDue = 0;
+  words.forEach(w => {
+    const s = srs[w.id];
+    if (!s) { nNew++; return; }
+    if (s.level >= 4) nMastered++;
+    else nLearning++;
+    if (s.nextReview <= today) nDue++;
+  });
+  const total = words.length || 1;
+  const pct = Math.round((nMastered / total) * 100);
+
+  document.getElementById('statNew').textContent = nNew;
+  document.getElementById('statLearning').textContent = nLearning;
+  document.getElementById('statMastered').textContent = nMastered;
+  document.getElementById('ringPct').textContent = pct + '%';
+  document.getElementById('dueCountHome').textContent = nDue;
+
+  const circumference = 427;
+  const offset = circumference - (circumference * pct / 100);
+  document.getElementById('ringFill').style.strokeDashoffset = offset;
+
+  document.getElementById('streakNum').textContent = streak.count + (streak.count === 1 ? ' day' : ' days');
+
+  const units = {};
+  words.forEach(w => {
+    if (!units[w.unit]) units[w.unit] = {total:0, mastered:0};
+    units[w.unit].total++;
+    const s = srs[w.id];
+    if (s && s.level >= 4) units[w.unit].mastered++;
+  });
+  let html = '';
+  Object.keys(units).sort().forEach(u => {
+    const d = units[u];
+    const p = Math.round((d.mastered / d.total) * 100);
+    html += `
+      <div class="unit-bar-row">
+        <div class="top"><span>${escapeHtml(u.replace(/^Unit \d+ - /,''))}</span><span class="pct">${d.mastered}/${d.total}</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${p}%"></div></div>
+      </div>`;
+  });
+  document.getElementById('unitProgressList').innerHTML = html || '<div class="empty-state">No words yet.</div>';
+}
+
 let currentUnitFilter = 'ALL';
 let studyQueue = [];
+let sessionTotal = 0;
 let currentCard = null;
 let flipped = false;
 
 function getUnits() {
-  const set = new Set(words.map(w => w.unit));
-  return Array.from(set).sort();
+  return Array.from(new Set(allWords().map(w => w.unit))).sort();
 }
 
 function buildStudyQueue() {
   const today = todayStr();
-  let pool = words.filter(w => currentUnitFilter === 'ALL' || w.unit === currentUnitFilter);
-  studyQueue = pool.filter(w => w.nextReview <= today);
-  // shuffle
+  let pool = allWords().filter(w => currentUnitFilter === 'ALL' || w.unit === currentUnitFilter);
+  studyQueue = pool.filter(w => ensureSrs(w.id).nextReview <= today);
+  sessionTotal = studyQueue.length;
   for (let i = studyQueue.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [studyQueue[i], studyQueue[j]] = [studyQueue[j], studyQueue[i]];
@@ -436,24 +396,16 @@ function renderUnitPicker() {
   });
 }
 
-function renderStats() {
-  const today = todayStr();
-  const pool = words.filter(w => currentUnitFilter === 'ALL' || w.unit === currentUnitFilter);
-  const due = pool.filter(w => w.nextReview <= today).length;
-  document.getElementById('dueCount').textContent = due + ' due';
-  document.getElementById('totalCount').textContent = pool.length + ' total';
-}
-
-function escapeHtml(s) {
-  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
 function nextCard() {
-  renderStats();
   const area = document.getElementById('studyArea');
+  const doneCount = sessionTotal - studyQueue.length;
+  const pct = sessionTotal ? Math.round((doneCount/sessionTotal)*100) : 0;
+  document.getElementById('sessionProgress').style.width = pct + '%';
+
   if (studyQueue.length === 0) {
     area.innerHTML = `<div class="empty-state"><div class="big">🎉</div>All caught up!<br><span style="font-size:0.85em">No cards due right now in this unit.</span></div>`;
     currentCard = null;
+    renderDashboard();
     return;
   }
   currentCard = studyQueue[0];
@@ -465,26 +417,26 @@ function renderCard() {
   const area = document.getElementById('studyArea');
   if (!currentCard) return;
   const unitShort = currentCard.unit.replace(/^Unit \d+ - /, '');
+  const vinfo = getVerbInfo(currentCard.word);
+  const verbTag = vinfo ? '<div class="verb-tag">verb</div>' : '';
   let inner;
   if (!flipped) {
     inner = `
-      <div class="card-wrap">
-        <div class="card" id="flipCard">
-          <div class="unit-tag">${escapeHtml(unitShort)}</div>
-          <div class="word">${escapeHtml(currentCard.word)}</div>
-          <div class="hint">Tap to reveal</div>
-        </div>
+      <div class="card" id="flipCard">
+        ${verbTag}
+        <div class="unit-tag">${escapeHtml(unitShort)}</div>
+        <div class="word">${escapeHtml(currentCard.word)}</div>
+        <div class="hint">Tap to reveal</div>
       </div>
     `;
   } else {
     inner = `
-      <div class="card-wrap">
-        <div class="card" id="flipCard">
-          <div class="unit-tag">${escapeHtml(unitShort)}</div>
-          <div class="word">${escapeHtml(currentCard.word)}</div>
-          <div class="translation">${escapeHtml(currentCard.translation)}</div>
-          <div class="example">${escapeHtml(currentCard.example)}</div>
-        </div>
+      <div class="card" id="flipCard">
+        ${verbTag}
+        <div class="unit-tag">${escapeHtml(unitShort)}</div>
+        <div class="word">${escapeHtml(currentCard.word)}</div>
+        <div class="translation">${escapeHtml(currentCard.translation)}</div>
+        <div class="example">${escapeHtml(currentCard.example || '')}</div>
       </div>
       <div class="grade-row">
         <button class="again" data-grade="again">Again</button>
@@ -506,44 +458,141 @@ function renderCard() {
 
 function grade(g) {
   const w = currentCard;
+  const s = ensureSrs(w.id);
   if (g === 'again') {
-    w.level = 0;
-    w.nextReview = todayStr(); // stays due, will cycle to back of queue
+    s.level = 0;
+    s.nextReview = todayStr();
   } else if (g === 'good') {
-    w.level = Math.min(w.level + 1, INTERVALS.length - 1);
-    w.nextReview = addDays(todayStr(), INTERVALS[w.level]);
+    s.level = Math.min(s.level + 1, INTERVALS.length - 1);
+    s.nextReview = addDays(todayStr(), INTERVALS[s.level]);
   } else if (g === 'easy') {
-    w.level = Math.min(w.level + 2, INTERVALS.length - 1);
-    w.nextReview = addDays(todayStr(), INTERVALS[w.level]);
+    s.level = Math.min(s.level + 2, INTERVALS.length - 1);
+    s.nextReview = addDays(todayStr(), INTERVALS[s.level]);
   }
-  saveData(words);
-  // remove from front of queue
+  saveSrs();
+  bumpStreak();
   studyQueue.shift();
-  if (g === 'again') {
-    // push back to end of this session's queue so it comes up again
-    studyQueue.push(w);
-  }
+  if (g === 'again') studyQueue.push(w);
   nextCard();
 }
 
-// ---- MANAGE SCREEN ----
+function getAllVerbs() {
+  return allWords()
+    .map(w => ({ word: w, info: getVerbInfo(w.word) }))
+    .filter(x => x.info);
+}
+
+function renderVerbList() {
+  const verbs = getAllVerbs();
+  const container = document.getElementById('verbList');
+  if (verbs.length === 0) {
+    container.innerHTML = '<div class="empty-state">No verbs detected yet.</div>';
+    return;
+  }
+  const tenseOrder = ['present','passeCompose','imparfait','futur','conditionnel','subjonctif'];
+  const tenseLabels = {present:'Présent', passeCompose:'Passé composé', imparfait:'Imparfait', futur:'Futur', conditionnel:'Conditionnel', subjonctif:'Subjonctif'};
+  const pronouns = ['je','tu','il/elle','nous','vous','ils/elles'];
+
+  let html = '';
+  verbs.forEach((v, idx) => {
+    const conj = v.info.conjugations;
+    let table = `<table class="conj-table"><thead><tr><th></th>`;
+    tenseOrder.forEach(t => table += `<th>${tenseLabels[t]}</th>`);
+    table += `</tr></thead><tbody>`;
+    pronouns.forEach((p, pi) => {
+      table += `<tr><td class="pronoun">${p}</td>`;
+      tenseOrder.forEach(t => {
+        table += `<td>${escapeHtml(conj[t][pi])}</td>`;
+      });
+      table += `</tr>`;
+    });
+    table += `</tbody></table>`;
+
+    html += `
+      <div class="verb-row" data-idx="${idx}">
+        <div class="vhead">
+          <div><span class="vword">${escapeHtml(v.word.word)}</span> <span class="vtrans">${escapeHtml(v.word.translation)}</span></div>
+          <div class="vexpand">▾</div>
+        </div>
+        <div class="conj-table-wrap">${table}</div>
+      </div>
+    `;
+  });
+  container.innerHTML = html;
+  container.querySelectorAll('.verb-row').forEach(row => {
+    row.addEventListener('click', () => row.classList.toggle('open'));
+  });
+}
+
+let quizState = null;
+function newQuiz() {
+  const verbs = getAllVerbs();
+  const quizBox = document.getElementById('quizBox');
+  if (verbs.length === 0) {
+    quizBox.innerHTML = '<div class="empty-state">Add some verbs first!</div>';
+    return;
+  }
+  const tenseOrder = ['present','passeCompose','imparfait','futur','conditionnel','subjonctif'];
+  const tenseLabels = {present:'présent', passeCompose:'passé composé', imparfait:'imparfait', futur:'futur simple', conditionnel:'conditionnel présent', subjonctif:'subjonctif présent'};
+  const pronouns = ['je','tu','il/elle','nous','vous','ils/elles'];
+
+  const v = verbs[Math.floor(Math.random()*verbs.length)];
+  const tense = tenseOrder[Math.floor(Math.random()*tenseOrder.length)];
+  const pi = Math.floor(Math.random()*pronouns.length);
+  const answer = v.info.conjugations[tense][pi];
+
+  quizState = { verb: v, tense, pi, answer };
+
+  quizBox.innerHTML = `
+    <div class="prompt">Conjugate <b>${escapeHtml(v.word.word)}</b></div>
+    <div class="tense-label">${tenseLabels[tense]} — ${pronouns[pi]}</div>
+    <input type="text" id="quizInput" placeholder="type the answer" autocomplete="off" autocapitalize="off">
+    <div class="result" id="quizResult"></div>
+    <button class="cta-btn" id="quizCheckBtn">Check</button>
+  `;
+  const input = document.getElementById('quizInput');
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') checkQuiz(); });
+  document.getElementById('quizCheckBtn').addEventListener('click', checkQuiz);
+  input.focus();
+}
+
+function checkQuiz() {
+  const input = document.getElementById('quizInput');
+  const resultEl = document.getElementById('quizResult');
+  const btn = document.getElementById('quizCheckBtn');
+  if (btn.textContent === 'Next verb →') { newQuiz(); return; }
+  const given = stripAccents(input.value);
+  const correct = stripAccents(quizState.answer);
+  if (given === correct) {
+    resultEl.textContent = '✓ Correct!';
+    resultEl.className = 'result correct';
+  } else {
+    resultEl.textContent = `✗ Correct answer: ${quizState.answer}`;
+    resultEl.className = 'result wrong';
+  }
+  btn.textContent = 'Next verb →';
+}
+
 function renderUnitDatalist() {
-  const dl = document.getElementById('unitList');
-  dl.innerHTML = getUnits().map(u => `<option value="${escapeHtml(u)}">`).join('');
+  document.getElementById('unitList').innerHTML = getUnits().map(u => `<option value="${escapeHtml(u)}">`).join('');
 }
 
 function renderWordList() {
   const container = document.getElementById('wordList');
-  const units = getUnits();
+  const words = allWords();
+  const units = Array.from(new Set(words.map(w => w.unit))).sort();
   let html = '';
   units.forEach(unit => {
     const unitWords = words.filter(w => w.unit === unit);
     html += `<div class="unit-section"><h3>${escapeHtml(unit)} (${unitWords.length})</h3>`;
     unitWords.forEach(w => {
+      const s = srs[w.id];
+      const lvl = s ? s.level : 0;
+      const isLocal = localWords.some(lw => lw.id === w.id);
       html += `
         <div class="word-row">
           <div>
-            <div class="w">${escapeHtml(w.word)} <span class="level-badge">Lv ${w.level}</span></div>
+            <div class="w">${escapeHtml(w.word)} <span class="level-badge">Lv ${lvl}</span>${isLocal ? '' : '<span class="source-badge">synced</span>'}</div>
             <div class="t">${escapeHtml(w.translation)}</div>
           </div>
           <button class="del" data-id="${w.id}">✕</button>
@@ -555,14 +604,20 @@ function renderWordList() {
   container.innerHTML = html || '<div class="empty-state">No words yet. Add one above!</div>';
   container.querySelectorAll('.del').forEach(btn => {
     btn.addEventListener('click', () => {
-      words = words.filter(w => w.id !== btn.dataset.id);
-      saveData(words);
-      renderWordList();
-      renderUnitDatalist();
-      renderUnitPicker();
-      buildStudyQueue();
+      const id = btn.dataset.id;
+      localWords = localWords.filter(w => w.id !== id);
+      saveLocalWords();
+      hidden.add(id);
+      saveHidden();
+      refreshAll();
     });
   });
+}
+
+function addSingleWord(unit, word, translation, example) {
+  const id = 'l-' + Date.now() + '-' + Math.floor(Math.random()*1000);
+  localWords.push({ id, unit, word, translation, example });
+  saveLocalWords();
 }
 
 document.getElementById('addWordBtn').addEventListener('click', () => {
@@ -570,82 +625,64 @@ document.getElementById('addWordBtn').addEventListener('click', () => {
   const word = document.getElementById('newWord').value.trim();
   const translation = document.getElementById('newTranslation').value.trim();
   const example = document.getElementById('newExample').value.trim();
-  if (!unit || !word || !translation) {
-    alert('Please fill in at least unit, word, and translation.');
-    return;
-  }
-  words.push({
-    id: 'w-' + Date.now() + '-' + Math.floor(Math.random()*1000),
-    unit, word, translation, example,
-    level: 0,
-    nextReview: todayStr()
-  });
-  saveData(words);
+  if (!unit || !word || !translation) { alert('Please fill in unit, word, and translation.'); return; }
+  addSingleWord(unit, word, translation, example);
   document.getElementById('newWord').value = '';
   document.getElementById('newTranslation').value = '';
   document.getElementById('newExample').value = '';
-  renderWordList();
-  renderUnitDatalist();
+  refreshAll();
+});
+
+document.getElementById('bulkAddBtn').addEventListener('click', () => {
+  const unit = document.getElementById('bulkUnit').value.trim();
+  const text = document.getElementById('bulkText').value.trim();
+  if (!unit || !text) { alert('Please provide a unit and at least one line.'); return; }
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  let added = 0;
+  lines.forEach(line => {
+    const parts = line.split(/\s*-\s*|\s*=\s*|\t/).map(p => p.trim()).filter(Boolean);
+    if (parts.length < 2) return;
+    const [word, translation, example] = parts;
+    addSingleWord(unit, word, translation, example || '');
+    added++;
+  });
+  document.getElementById('bulkText').value = '';
+  refreshAll();
+  alert(`Added ${added} word(s).`);
+});
+
+document.querySelectorAll('.tabbar button').forEach(btn => {
+  btn.addEventListener('click', () => switchScreen(btn.dataset.screen));
+});
+document.getElementById('goStudyBtn').addEventListener('click', () => switchScreen('study'));
+document.getElementById('goGrammarBtn').addEventListener('click', () => switchScreen('grammar'));
+
+function switchScreen(name) {
+  document.querySelectorAll('.tabbar button').forEach(b => b.classList.toggle('active', b.dataset.screen === name));
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  if (name === 'manage') { renderWordList(); renderUnitDatalist(); }
+  if (name === 'grammar') { renderVerbList(); newQuiz(); }
+  if (name === 'study') { renderUnitPicker(); buildStudyQueue(); nextCard(); }
+  if (name === 'home') { renderDashboard(); }
+}
+
+function refreshAll() {
+  renderDashboard();
   renderUnitPicker();
   buildStudyQueue();
-});
+  renderWordList();
+  renderUnitDatalist();
+}
 
-document.getElementById('exportBtn').addEventListener('click', () => {
-  const blob = new Blob([JSON.stringify(words, null, 2)], {type: 'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'mon-vocabulaire-backup-' + todayStr() + '.json';
-  a.click();
-  URL.revokeObjectURL(url);
-});
-
-document.getElementById('importBtn').addEventListener('click', () => {
-  document.getElementById('importFile').click();
-});
-document.getElementById('importFile').addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      const imported = JSON.parse(reader.result);
-      if (!Array.isArray(imported)) throw new Error('bad format');
-      words = imported;
-      saveData(words);
-      renderWordList();
-      renderUnitDatalist();
-      renderUnitPicker();
-      buildStudyQueue();
-      nextCard();
-      alert('Import successful!');
-    } catch (err) {
-      alert('Could not import: invalid file.');
-    }
-  };
-  reader.readAsText(file);
-});
-
-// ---- NAV ----
-document.querySelectorAll('nav button').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById('screen-' + btn.dataset.screen).classList.add('active');
-    if (btn.dataset.screen === 'manage') {
-      renderWordList();
-      renderUnitDatalist();
-    }
-  });
-});
-
-// ---- INIT ----
-renderUnitPicker();
-buildStudyQueue();
-nextCard();
-renderWordList();
-renderUnitDatalist();
+(async function init() {
+  await loadRemoteWords();
+  renderDashboard();
+  renderUnitPicker();
+  buildStudyQueue();
+  renderWordList();
+  renderUnitDatalist();
+})();
 </script>
 
 </body>
