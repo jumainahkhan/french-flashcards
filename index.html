@@ -88,6 +88,12 @@
     padding: 6px 14px; border-radius: 999px; font-size: 0.78em; cursor: pointer; white-space: nowrap;
   }
   .unit-chip.active { background: var(--accent2); color: #0b0e14; border-color: var(--accent2); font-weight: 700; }
+  .tense-picker { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 14px; flex-wrap: wrap; }
+  .tense-chip {
+    flex: 0 0 auto; background: var(--card-bg); border: 1px solid #2a3542; color: var(--muted);
+    padding: 7px 14px; border-radius: 999px; font-size: 0.78em; cursor: pointer; white-space: nowrap;
+  }
+  .tense-chip.active { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 700; }
   .progress-track { height: 6px; background: #222a3a; border-radius: 4px; margin-bottom: 14px; overflow: hidden; }
   .progress-fill { height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.25s; }
   .card {
@@ -207,6 +213,9 @@
   </div>
 
   <div class="screen" id="screen-grammar">
+    <div class="section-title">Tenses to practice</div>
+    <div class="tense-picker" id="tensePicker"></div>
+
     <div class="section-title">Verb conjugation quiz</div>
     <div class="quiz-box" id="quizBox"></div>
 
@@ -215,6 +224,13 @@
   </div>
 
   <div class="screen" id="screen-manage">
+    <div class="form-box">
+      <h4>Daily new-word limit</h4>
+      <div class="hint-txt">How many brand-new words to introduce per day (keeps 3000-word lists from overwhelming you)</div>
+      <input type="number" id="newCapInput" min="5" max="100" step="5">
+      <button id="newCapSaveBtn">Save limit</button>
+    </div>
+
     <div class="form-box">
       <h4>Quick add (one line)</h4>
       <input type="text" id="newUnit" placeholder="Unit (e.g. Unit 3 - Le temps libre)" list="unitList">
@@ -253,6 +269,9 @@ const STORAGE_HIDDEN = 'ffc_hidden_v2';
 const STORAGE_STREAK = 'ffc_streak_v2';
 
 const INTERVALS = [0, 1, 3, 7, 16, 30];
+const STORAGE_NEW_CAP = 'ffc_new_cap_v1';
+const STORAGE_NEW_INTRO_TODAY = 'ffc_new_intro_today_v1';
+let newWordsCapPerDay = parseInt(localStorage.getItem(STORAGE_NEW_CAP) || '15', 10);
 
 function todayStr() { return new Date().toISOString().slice(0,10); }
 function addDays(dateStr, days) {
@@ -290,10 +309,15 @@ function ensureSrs(id) {
 
 async function loadRemoteWords() {
   try {
-    const res = await fetch('./data/words.json', {cache: 'no-store'});
-    if (res.ok) remoteWords = await res.json();
+    const [res1, res2] = await Promise.all([
+      fetch('./data/words.json', {cache: 'no-store'}),
+      fetch('./data/freq_words.json', {cache: 'no-store'})
+    ]);
+    const base = res1.ok ? await res1.json() : [];
+    const freq = res2.ok ? await res2.json() : [];
+    remoteWords = base.concat(freq);
   } catch(e) {
-    console.warn('Could not fetch remote words.json', e);
+    console.warn('Could not fetch remote word lists', e);
   }
 }
 
@@ -370,12 +394,38 @@ function getUnits() {
 function buildStudyQueue() {
   const today = todayStr();
   let pool = allWords().filter(w => currentUnitFilter === 'ALL' || w.unit === currentUnitFilter);
-  studyQueue = pool.filter(w => ensureSrs(w.id).nextReview <= today);
+
+  // split into due-review (already has SRS progress) vs brand-new (never studied)
+  const dueReview = [];
+  const brandNew = [];
+  pool.forEach(w => {
+    const existing = srs[w.id];
+    if (existing) {
+      if (existing.nextReview <= today) dueReview.push(w);
+    } else {
+      brandNew.push(w);
+    }
+  });
+
+  // cap how many brand-new words get introduced today (classic SRS daily new-word limit)
+  const introToday = JSON.parse(localStorage.getItem(STORAGE_NEW_INTRO_TODAY) || '{}');
+  const introducedCount = introToday.date === today ? introToday.count : 0;
+  const remainingNewSlots = Math.max(0, newWordsCapPerDay - introducedCount);
+  const newBatch = brandNew.slice(0, remainingNewSlots);
+
+  studyQueue = dueReview.concat(newBatch);
   sessionTotal = studyQueue.length;
   for (let i = studyQueue.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [studyQueue[i], studyQueue[j]] = [studyQueue[j], studyQueue[i]];
   }
+}
+
+function recordNewWordIntroduced() {
+  const today = todayStr();
+  const introToday = JSON.parse(localStorage.getItem(STORAGE_NEW_INTRO_TODAY) || '{}');
+  const count = introToday.date === today ? introToday.count + 1 : 1;
+  localStorage.setItem(STORAGE_NEW_INTRO_TODAY, JSON.stringify({date: today, count}));
 }
 
 function renderUnitPicker() {
@@ -458,7 +508,9 @@ function renderCard() {
 
 function grade(g) {
   const w = currentCard;
+  const isNewWord = !srs[w.id];
   const s = ensureSrs(w.id);
+  if (isNewWord) recordNewWordIntroduced();
   if (g === 'again') {
     s.level = 0;
     s.nextReview = todayStr();
@@ -525,6 +577,33 @@ function renderVerbList() {
 }
 
 let quizState = null;
+const STORAGE_TENSE_SELECTION = 'ffc_tense_selection_v1';
+const ALL_TENSES = ['present','passeCompose','imparfait','futur','conditionnel','subjonctif'];
+const TENSE_LABELS_SHORT = {present:'Présent', passeCompose:'Passé composé', imparfait:'Imparfait', futur:'Futur', conditionnel:'Conditionnel', subjonctif:'Subjonctif'};
+let selectedTenses = JSON.parse(localStorage.getItem(STORAGE_TENSE_SELECTION) || 'null') || ['present','passeCompose','imparfait','futur'];
+
+function saveTenseSelection() { localStorage.setItem(STORAGE_TENSE_SELECTION, JSON.stringify(selectedTenses)); }
+
+function renderTensePicker() {
+  const picker = document.getElementById('tensePicker');
+  picker.innerHTML = ALL_TENSES.map(t =>
+    `<div class="tense-chip ${selectedTenses.includes(t)?'active':''}" data-tense="${t}">${TENSE_LABELS_SHORT[t]}</div>`
+  ).join('');
+  picker.querySelectorAll('.tense-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const t = chip.dataset.tense;
+      if (selectedTenses.includes(t)) {
+        if (selectedTenses.length > 1) selectedTenses = selectedTenses.filter(x => x !== t);
+      } else {
+        selectedTenses.push(t);
+      }
+      saveTenseSelection();
+      renderTensePicker();
+      newQuiz();
+    });
+  });
+}
+
 function newQuiz() {
   const verbs = getAllVerbs();
   const quizBox = document.getElementById('quizBox');
@@ -532,7 +611,7 @@ function newQuiz() {
     quizBox.innerHTML = '<div class="empty-state">Add some verbs first!</div>';
     return;
   }
-  const tenseOrder = ['present','passeCompose','imparfait','futur','conditionnel','subjonctif'];
+  const tenseOrder = selectedTenses.length ? selectedTenses : ALL_TENSES;
   const tenseLabels = {present:'présent', passeCompose:'passé composé', imparfait:'imparfait', futur:'futur simple', conditionnel:'conditionnel présent', subjonctif:'subjonctif présent'};
   const pronouns = ['je','tu','il/elle','nous','vous','ils/elles'];
 
@@ -620,6 +699,17 @@ function addSingleWord(unit, word, translation, example) {
   saveLocalWords();
 }
 
+document.getElementById('newCapSaveBtn').addEventListener('click', () => {
+  const val = parseInt(document.getElementById('newCapInput').value, 10);
+  if (!isNaN(val) && val > 0) {
+    newWordsCapPerDay = val;
+    localStorage.setItem(STORAGE_NEW_CAP, String(val));
+    buildStudyQueue();
+    renderDashboard();
+    alert('Daily new-word limit saved: ' + val);
+  }
+});
+
 document.getElementById('addWordBtn').addEventListener('click', () => {
   const unit = document.getElementById('newUnit').value.trim();
   const word = document.getElementById('newWord').value.trim();
@@ -661,8 +751,8 @@ function switchScreen(name) {
   document.querySelectorAll('.tabbar button').forEach(b => b.classList.toggle('active', b.dataset.screen === name));
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + name).classList.add('active');
-  if (name === 'manage') { renderWordList(); renderUnitDatalist(); }
-  if (name === 'grammar') { renderVerbList(); newQuiz(); }
+  if (name === 'manage') { renderWordList(); renderUnitDatalist(); document.getElementById('newCapInput').value = newWordsCapPerDay; }
+  if (name === 'grammar') { renderTensePicker(); renderVerbList(); newQuiz(); }
   if (name === 'study') { renderUnitPicker(); buildStudyQueue(); nextCard(); }
   if (name === 'home') { renderDashboard(); }
 }
