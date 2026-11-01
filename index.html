@@ -4,31 +4,47 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mon Vocabulaire — French Flashcards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0b0e14;
-    --bg2: #11151e;
-    --card-bg: #1a2030;
-    --accent: #6c8bff;
-    --accent2: #35c48f;
+    --bg: #11101c;
+    --bg2: #171527;
+    --card-bg: #211f35;
+    --card-bg2: #2a2745;
+    --accent: #2dd4bf;
+    --accent-dark: #159e8d;
+    --accent2: #34d399;
+    --gold: #fbbf24;
     --warn: #f5b942;
-    --danger: #ef5876;
-    --text: #eef1f7;
-    --muted: #8893a8;
-    --radius: 18px;
+    --danger: #fb7185;
+    --coral: #ff7a59;
+    --text: #f3f1fb;
+    --muted: #9893b5;
+    --radius: 20px;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body {
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: var(--bg);
+    background-image: radial-gradient(circle at 15% 0%, rgba(45,212,191,0.12), transparent 40%), radial-gradient(circle at 85% 20%, rgba(255,122,89,0.10), transparent 45%);
     color: var(--text);
     min-height: 100vh;
     padding-bottom: 90px;
   }
-  header { padding: 22px 16px 10px; text-align: center; }
+  h1, h2, h3, h4, .word, .vword, .n, button { font-family: 'Poppins', 'Nunito', sans-serif; }
+  header { padding: 22px 16px 10px; text-align: center; position: relative; }
   header h1 { font-size: 1.3em; margin: 0 0 2px; letter-spacing: 0.2px; }
   header .sub { color: var(--muted); font-size: 0.8em; }
+  .level-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: #0b1410; font-weight: 800; font-size: 0.72em;
+    padding: 4px 12px; border-radius: 999px; margin-top: 8px;
+    box-shadow: 0 2px 10px rgba(45,212,191,0.3);
+  }
   main { max-width: 480px; margin: 0 auto; padding: 0 16px; }
   .screen { display: none; }
   .screen.active { display: block; animation: fadein 0.2s ease; }
@@ -69,6 +85,25 @@
   .streak-banner .flame { font-size: 1.6em; }
   .streak-banner .txt { font-size: 0.85em; color: var(--muted); }
   .streak-banner .num { font-size: 1.3em; font-weight: 700; }
+  .streak-banner.on-fire { background: linear-gradient(135deg, #7c2d12, #ff7a59); animation: pulse-glow 1.6s ease-in-out infinite; }
+  @keyframes pulse-glow { 0%,100% { box-shadow: 0 0 0px rgba(255,122,89,0); } 50% { box-shadow: 0 0 22px rgba(255,122,89,0.5); } }
+
+  .xp-box { background: var(--card-bg); border-radius: 14px; padding: 14px 16px; margin-bottom: 18px; }
+  .xp-box .xp-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .xp-box .xp-label { font-size: 0.82em; color: var(--muted); }
+  .xp-box .xp-level { font-weight: 800; color: var(--gold); font-size: 0.9em; }
+  .xp-track { height: 10px; background: #2a2745; border-radius: 6px; overflow: hidden; }
+  .xp-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--coral)); border-radius: 6px; transition: width 0.4s ease; }
+
+  .badge-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px; }
+  .badge-item {
+    background: var(--card-bg); border-radius: 14px; padding: 10px 4px; text-align: center;
+    opacity: 0.35; filter: grayscale(1);
+  }
+  .badge-item.earned { opacity: 1; filter: none; background: var(--card-bg2); box-shadow: 0 2px 10px rgba(251,191,36,0.15); }
+  .badge-item .bicon { font-size: 1.6em; }
+  .badge-item .blabel { font-size: 0.6em; color: var(--muted); margin-top: 2px; }
+  .badge-item.earned .blabel { color: var(--gold); }
 
   .section-title { font-size: 0.8em; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 18px 0 8px; }
   .unit-bar-row { margin-bottom: 10px; }
@@ -93,30 +128,71 @@
     flex: 0 0 auto; background: var(--card-bg); border: 1px solid #2a3542; color: var(--muted);
     padding: 7px 14px; border-radius: 999px; font-size: 0.78em; cursor: pointer; white-space: nowrap;
   }
-  .tense-chip.active { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 700; }
+  .tense-chip.active { background: var(--accent); color: #0b1410; border-color: var(--accent); font-weight: 700; }
   .progress-track { height: 6px; background: #222a3a; border-radius: 4px; margin-bottom: 14px; overflow: hidden; }
   .progress-fill { height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.25s; }
-  .card {
+
+  .combo-row { display: flex; justify-content: center; margin-bottom: 10px; min-height: 22px; }
+  .combo-badge {
+    background: linear-gradient(135deg, var(--gold), var(--coral)); color: #2a1200;
+    font-weight: 800; font-size: 0.78em; padding: 4px 14px; border-radius: 999px;
+    opacity: 0; transform: scale(0.7); transition: all 0.25s ease;
+  }
+  .combo-badge.show { opacity: 1; transform: scale(1); }
+
+  .flip-scene { perspective: 1200px; min-height: 220px; }
+  .flip-card-inner {
+    position: relative; width: 100%; min-height: 220px;
+    transition: transform 0.45s cubic-bezier(.4,.2,.2,1);
+    transform-style: preserve-3d;
+  }
+  .flip-card-inner.flipped { transform: rotateY(180deg); }
+  .flip-face {
+    position: absolute; inset: 0; backface-visibility: hidden;
     background: var(--card-bg); border-radius: var(--radius); padding: 36px 22px; min-height: 220px;
     display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
-    cursor: pointer; box-shadow: 0 8px 28px rgba(0,0,0,0.35); position: relative;
+    cursor: pointer; box-shadow: 0 8px 28px rgba(0,0,0,0.35);
   }
+  .flip-face.front { background: linear-gradient(160deg, var(--card-bg2), var(--card-bg)); }
+  .flip-face.back { transform: rotateY(180deg); background: linear-gradient(160deg, #1c3a35, var(--card-bg)); }
   .card .unit-tag { position: absolute; top: 14px; left: 20px; font-size: 0.68em; color: var(--muted); }
   .card .verb-tag {
     position: absolute; top: 14px; right: 20px; font-size: 0.65em;
     background: #2a3550; color: #9fb4ff; padding: 2px 8px; border-radius: 999px;
   }
-  .card .word { font-size: 1.7em; font-weight: 700; margin-bottom: 8px; }
-  .card .hint { color: var(--muted); font-size: 0.78em; }
-  .card .translation { font-size: 1.25em; color: var(--accent); margin-bottom: 10px; font-weight: 700; }
-  .card .example { color: var(--muted); font-size: 0.92em; font-style: italic; }
+  .flip-face .word { font-size: 1.7em; font-weight: 700; margin-bottom: 8px; }
+  .flip-face .hint { color: var(--muted); font-size: 0.78em; }
+  .flip-face .translation { font-size: 1.25em; color: var(--accent); margin-bottom: 10px; font-weight: 700; }
+  .flip-face .example { color: var(--muted); font-size: 0.92em; font-style: italic; }
   .grade-row { display: flex; gap: 10px; margin-top: 16px; }
-  .grade-row button { flex: 1; padding: 15px 0; border: none; border-radius: 14px; font-size: 0.92em; font-weight: 700; cursor: pointer; color: #0b0e14; }
+  .grade-row button {
+    flex: 1; padding: 15px 0; border: none; border-radius: 14px; font-size: 0.92em; font-weight: 700;
+    cursor: pointer; color: #0b0e14; transition: transform 0.1s;
+  }
+  .grade-row button:active { transform: scale(0.95); }
   .grade-row .again { background: var(--danger); color: #fff; }
-  .grade-row .good { background: var(--accent); color: #fff; }
+  .grade-row .good { background: var(--accent); color: #0b1410; }
   .grade-row .easy { background: var(--accent2); }
   .empty-state { text-align: center; color: var(--muted); padding: 60px 20px; }
   .empty-state .big { font-size: 3em; margin-bottom: 10px; }
+
+  .toast {
+    position: fixed; top: 16px; left: 50%; transform: translateX(-50%) translateY(-20px);
+    background: var(--card-bg2); border: 1px solid var(--gold); color: var(--text);
+    padding: 10px 18px; border-radius: 999px; font-size: 0.85em; font-weight: 700;
+    opacity: 0; transition: all 0.3s ease; z-index: 100; white-space: nowrap; box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .confetti-piece {
+    position: fixed; top: -10px; width: 8px; height: 14px; z-index: 99; pointer-events: none;
+    animation: confetti-fall linear forwards;
+  }
+  @keyframes confetti-fall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
 
   .verb-row { background: var(--card-bg); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; cursor: pointer; }
   .verb-row .vhead { display: flex; justify-content: space-between; align-items: center; }
@@ -166,6 +242,7 @@
 <header>
   <h1>🇫🇷 Mon Vocabulaire</h1>
   <div class="sub">B1 flashcards · verbs · progress</div>
+  <div class="level-pill" id="headerLevelPill">⭐ Level 1</div>
 </header>
 
 <main>
@@ -174,8 +251,8 @@
     <div class="hero-ring-wrap">
       <div class="hero-ring">
         <svg width="160" height="160">
-          <circle cx="80" cy="80" r="68" stroke="#222a3a" stroke-width="14" fill="none"/>
-          <circle id="ringFill" cx="80" cy="80" r="68" stroke="#6c8bff" stroke-width="14" fill="none"
+          <circle cx="80" cy="80" r="68" stroke="#2a2745" stroke-width="14" fill="none"/>
+          <circle id="ringFill" cx="80" cy="80" r="68" stroke="#2dd4bf" stroke-width="14" fill="none"
                   stroke-dasharray="427" stroke-dashoffset="427" stroke-linecap="round"/>
         </svg>
         <div class="center">
@@ -185,22 +262,33 @@
       </div>
     </div>
 
+    <div class="xp-box">
+      <div class="xp-top">
+        <span class="xp-label">XP to next level</span>
+        <span class="xp-level" id="xpLevelLabel">Lv 1</span>
+      </div>
+      <div class="xp-track"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
+    </div>
+
     <div class="stat-grid">
       <div class="stat-box new"><div class="v" id="statNew">0</div><div class="l">New</div></div>
       <div class="stat-box learning"><div class="v" id="statLearning">0</div><div class="l">Learning</div></div>
       <div class="stat-box mastered"><div class="v" id="statMastered">0</div><div class="l">Mastered</div></div>
     </div>
 
-    <div class="streak-banner">
+    <div class="streak-banner" id="streakBanner">
       <div>
         <div class="txt">Current streak</div>
         <div class="num" id="streakNum">0 days</div>
       </div>
-      <div class="flame">🔥</div>
+      <div class="flame" id="streakFlame">🔥</div>
     </div>
 
     <button class="cta-btn" id="goStudyBtn">Study now (<span id="dueCountHome">0</span> due)</button>
     <button class="cta-btn secondary" id="goGrammarBtn" style="margin-top:8px;">Practice verb conjugation</button>
+
+    <div class="section-title">Achievements</div>
+    <div class="badge-grid" id="badgeGrid"></div>
 
     <div class="section-title">Progress by unit</div>
     <div id="unitProgressList"></div>
@@ -209,6 +297,7 @@
   <div class="screen" id="screen-study">
     <div class="unit-picker" id="unitPicker"></div>
     <div class="progress-track"><div class="progress-fill" id="sessionProgress" style="width:0%"></div></div>
+    <div class="combo-row"><div class="combo-badge" id="comboBadge"></div></div>
     <div id="studyArea"></div>
   </div>
 
@@ -267,6 +356,9 @@ const STORAGE_SRS = 'ffc_srs_v2';
 const STORAGE_LOCAL_WORDS = 'ffc_local_words_v2';
 const STORAGE_HIDDEN = 'ffc_hidden_v2';
 const STORAGE_STREAK = 'ffc_streak_v2';
+const STORAGE_XP = 'ffc_xp_v1';
+const STORAGE_BADGES = 'ffc_badges_v1';
+const STORAGE_BEST_COMBO = 'ffc_best_combo_v1';
 
 const INTERVALS = [0, 1, 3, 7, 16, 30];
 const STORAGE_NEW_CAP = 'ffc_new_cap_v1';
@@ -331,6 +423,114 @@ function bumpStreak() {
   saveStreak();
 }
 
+// ================= GAMIFICATION: XP, levels, badges, combo, toasts, confetti =================
+let xp = parseInt(localStorage.getItem(STORAGE_XP) || '0', 10);
+let badgesEarned = new Set(JSON.parse(localStorage.getItem(STORAGE_BADGES) || '[]'));
+let bestCombo = parseInt(localStorage.getItem(STORAGE_BEST_COMBO) || '0', 10);
+let comboCount = 0;
+
+function saveXp() { localStorage.setItem(STORAGE_XP, String(xp)); }
+function saveBadges() { localStorage.setItem(STORAGE_BADGES, JSON.stringify(Array.from(badgesEarned))); }
+function saveBestCombo() { localStorage.setItem(STORAGE_BEST_COMBO, String(bestCombo)); }
+
+function xpForLevel(level) { return 100 * level; } // XP needed to go from level N to N+1
+function levelFromXp(totalXp) {
+  let level = 1, remaining = totalXp;
+  while (remaining >= xpForLevel(level)) {
+    remaining -= xpForLevel(level);
+    level++;
+  }
+  return { level, intoLevel: remaining, needed: xpForLevel(level) };
+}
+
+function showToast(msg) {
+  let el = document.getElementById('toastEl');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'toastEl';
+    el.className = 'toast';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+function fireConfetti() {
+  const colors = ['#2dd4bf', '#fbbf24', '#ff7a59', '#34d399', '#fb7185'];
+  for (let i = 0; i < 40; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDuration = (1.5 + Math.random() * 1.5) + 's';
+    piece.style.transform = `rotate(${Math.random()*360}deg)`;
+    document.body.appendChild(piece);
+    setTimeout(() => piece.remove(), 3200);
+  }
+}
+
+const BADGE_DEFS = [
+  { id: 'first_word', icon: '🌱', label: 'First Word', check: (ctx) => ctx.totalReviewed >= 1 },
+  { id: 'streak_3', icon: '🔥', label: '3-Day Streak', check: (ctx) => ctx.streak >= 3 },
+  { id: 'streak_7', icon: '🔥', label: 'Week Streak', check: (ctx) => ctx.streak >= 7 },
+  { id: 'streak_30', icon: '🏆', label: 'Month Streak', check: (ctx) => ctx.streak >= 30 },
+  { id: 'combo_10', icon: '⚡', label: 'Combo x10', check: (ctx) => ctx.bestCombo >= 10 },
+  { id: 'combo_25', icon: '💫', label: 'Combo x25', check: (ctx) => ctx.bestCombo >= 25 },
+  { id: 'mastered_10', icon: '🎓', label: '10 Mastered', check: (ctx) => ctx.mastered >= 10 },
+  { id: 'mastered_50', icon: '👑', label: '50 Mastered', check: (ctx) => ctx.mastered >= 50 },
+  { id: 'mastered_100', icon: '💎', label: '100 Mastered', check: (ctx) => ctx.mastered >= 100 },
+  { id: 'verb_master', icon: '🧩', label: 'Verb Explorer', check: (ctx) => ctx.verbsSeen >= 5 },
+  { id: 'level_5', icon: '⭐', label: 'Level 5', check: (ctx) => ctx.level >= 5 },
+  { id: 'level_10', icon: '🌟', label: 'Level 10', check: (ctx) => ctx.level >= 10 },
+];
+
+function checkBadges() {
+  const words = allWords();
+  const mastered = words.filter(w => srs[w.id] && srs[w.id].level >= 4).length;
+  const totalReviewed = Object.keys(srs).length;
+  const verbsSeen = getAllVerbs ? getAllVerbs().length : 0;
+  const { level } = levelFromXp(xp);
+  const ctx = { streak: streak.count, bestCombo, mastered, totalReviewed, verbsSeen, level };
+  let newlyEarned = [];
+  BADGE_DEFS.forEach(b => {
+    if (!badgesEarned.has(b.id) && b.check(ctx)) {
+      badgesEarned.add(b.id);
+      newlyEarned.push(b);
+    }
+  });
+  if (newlyEarned.length) {
+    saveBadges();
+    newlyEarned.forEach(b => showToast(`${b.icon} Badge unlocked: ${b.label}!`));
+  }
+  return newlyEarned;
+}
+
+function awardXp(amount) {
+  const before = levelFromXp(xp).level;
+  xp += amount;
+  saveXp();
+  const after = levelFromXp(xp).level;
+  if (after > before) {
+    showToast(`🎉 Level up! You reached Level ${after}`);
+    fireConfetti();
+  }
+  checkBadges();
+}
+
+function renderBadgeGrid() {
+  const grid = document.getElementById('badgeGrid');
+  if (!grid) return;
+  grid.innerHTML = BADGE_DEFS.map(b => `
+    <div class="badge-item ${badgesEarned.has(b.id) ? 'earned' : ''}" title="${escapeHtml(b.label)}">
+      <div class="bicon">${b.icon}</div>
+      <div class="blabel">${escapeHtml(b.label)}</div>
+    </div>
+  `).join('');
+}
+
+
 function getVerbInfo(word) {
   return window.FrenchConjugate ? window.FrenchConjugate.analyze(word) : null;
 }
@@ -360,6 +560,20 @@ function renderDashboard() {
   document.getElementById('ringFill').style.strokeDashoffset = offset;
 
   document.getElementById('streakNum').textContent = streak.count + (streak.count === 1 ? ' day' : ' days');
+  const banner = document.getElementById('streakBanner');
+  if (banner) {
+    if (streak.count >= 3) banner.classList.add('on-fire'); else banner.classList.remove('on-fire');
+  }
+
+  const lvl = levelFromXp(xp);
+  const pillEl = document.getElementById('headerLevelPill');
+  if (pillEl) pillEl.textContent = `⭐ Level ${lvl.level}`;
+  const xpLevelLabel = document.getElementById('xpLevelLabel');
+  if (xpLevelLabel) xpLevelLabel.textContent = `Lv ${lvl.level} → ${lvl.level+1} (${lvl.intoLevel}/${lvl.needed} XP)`;
+  const xpFill = document.getElementById('xpFill');
+  if (xpFill) xpFill.style.width = Math.round((lvl.intoLevel/lvl.needed)*100) + '%';
+
+  renderBadgeGrid();
 
   const units = {};
   words.forEach(w => {
@@ -439,6 +653,8 @@ function renderUnitPicker() {
   picker.querySelectorAll('.unit-chip').forEach(chip => {
     chip.addEventListener('click', () => {
       currentUnitFilter = chip.dataset.unit;
+      comboCount = 0;
+      updateComboDisplay();
       buildStudyQueue();
       renderUnitPicker();
       nextCard();
@@ -453,8 +669,15 @@ function nextCard() {
   document.getElementById('sessionProgress').style.width = pct + '%';
 
   if (studyQueue.length === 0) {
+    const justFinishedSession = sessionTotal > 0 && doneCount === sessionTotal;
     area.innerHTML = `<div class="empty-state"><div class="big">🎉</div>All caught up!<br><span style="font-size:0.85em">No cards due right now in this unit.</span></div>`;
     currentCard = null;
+    comboCount = 0;
+    updateComboDisplay();
+    if (justFinishedSession) {
+      fireConfetti();
+      showToast('🎉 Session complete!');
+    }
     renderDashboard();
     return;
   }
@@ -469,40 +692,49 @@ function renderCard() {
   const unitShort = currentCard.unit.replace(/^Unit \d+ - /, '');
   const vinfo = getVerbInfo(currentCard.word);
   const verbTag = vinfo ? '<div class="verb-tag">verb</div>' : '';
-  let inner;
+
+  area.innerHTML = `
+    <div class="flip-scene">
+      <div class="flip-card-inner ${flipped ? 'flipped' : ''}" id="flipInner">
+        <div class="flip-face front">
+          ${verbTag}
+          <div class="unit-tag">${escapeHtml(unitShort)}</div>
+          <div class="word">${escapeHtml(currentCard.word)}</div>
+          <div class="hint">Tap to reveal</div>
+        </div>
+        <div class="flip-face back">
+          ${verbTag}
+          <div class="unit-tag">${escapeHtml(unitShort)}</div>
+          <div class="word">${escapeHtml(currentCard.word)}</div>
+          <div class="translation">${escapeHtml(currentCard.translation)}</div>
+          <div class="example">${escapeHtml(currentCard.example || '')}</div>
+        </div>
+      </div>
+    </div>
+    <div class="grade-row" id="gradeRow" style="display:${flipped ? 'flex' : 'none'};">
+      <button class="again" data-grade="again">Again</button>
+      <button class="good" data-grade="good">Good</button>
+      <button class="easy" data-grade="easy">Easy</button>
+    </div>
+  `;
+  const inner = document.getElementById('flipInner');
   if (!flipped) {
-    inner = `
-      <div class="card" id="flipCard">
-        ${verbTag}
-        <div class="unit-tag">${escapeHtml(unitShort)}</div>
-        <div class="word">${escapeHtml(currentCard.word)}</div>
-        <div class="hint">Tap to reveal</div>
-      </div>
-    `;
+    inner.addEventListener('click', () => { flipped = true; renderCard(); });
   } else {
-    inner = `
-      <div class="card" id="flipCard">
-        ${verbTag}
-        <div class="unit-tag">${escapeHtml(unitShort)}</div>
-        <div class="word">${escapeHtml(currentCard.word)}</div>
-        <div class="translation">${escapeHtml(currentCard.translation)}</div>
-        <div class="example">${escapeHtml(currentCard.example || '')}</div>
-      </div>
-      <div class="grade-row">
-        <button class="again" data-grade="again">Again</button>
-        <button class="good" data-grade="good">Good</button>
-        <button class="easy" data-grade="easy">Easy</button>
-      </div>
-    `;
-  }
-  area.innerHTML = inner;
-  const cardEl = document.getElementById('flipCard');
-  if (!flipped) {
-    cardEl.addEventListener('click', () => { flipped = true; renderCard(); });
-  } else {
-    area.querySelectorAll('[data-grade]').forEach(btn => {
+    document.querySelectorAll('[data-grade]').forEach(btn => {
       btn.addEventListener('click', () => grade(btn.dataset.grade));
     });
+  }
+}
+
+function updateComboDisplay() {
+  const el = document.getElementById('comboBadge');
+  if (!el) return;
+  if (comboCount >= 2) {
+    el.textContent = `🔥 ${comboCount} in a row!`;
+    el.classList.add('show');
+  } else {
+    el.classList.remove('show');
   }
 }
 
@@ -514,13 +746,21 @@ function grade(g) {
   if (g === 'again') {
     s.level = 0;
     s.nextReview = todayStr();
+    comboCount = 0;
+    awardXp(1);
   } else if (g === 'good') {
     s.level = Math.min(s.level + 1, INTERVALS.length - 1);
     s.nextReview = addDays(todayStr(), INTERVALS[s.level]);
+    comboCount++;
+    awardXp(5 + (isNewWord ? 5 : 0));
   } else if (g === 'easy') {
     s.level = Math.min(s.level + 2, INTERVALS.length - 1);
     s.nextReview = addDays(todayStr(), INTERVALS[s.level]);
+    comboCount++;
+    awardXp(8 + (isNewWord ? 5 : 0));
   }
+  if (comboCount > bestCombo) { bestCombo = comboCount; saveBestCombo(); }
+  updateComboDisplay();
   saveSrs();
   bumpStreak();
   studyQueue.shift();
@@ -753,7 +993,7 @@ function switchScreen(name) {
   document.getElementById('screen-' + name).classList.add('active');
   if (name === 'manage') { renderWordList(); renderUnitDatalist(); document.getElementById('newCapInput').value = newWordsCapPerDay; }
   if (name === 'grammar') { renderTensePicker(); renderVerbList(); newQuiz(); }
-  if (name === 'study') { renderUnitPicker(); buildStudyQueue(); nextCard(); }
+  if (name === 'study') { comboCount = 0; updateComboDisplay(); renderUnitPicker(); buildStudyQueue(); nextCard(); }
   if (name === 'home') { renderDashboard(); }
 }
 
