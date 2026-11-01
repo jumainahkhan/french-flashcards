@@ -4,6 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mon Vocabulaire — French Flashcards</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2dd4bf">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mon Vocab">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
+<link rel="apple-touch-icon" sizes="167x167" href="icons/icon-167.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -184,6 +195,38 @@
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+  .install-banner {
+    background: linear-gradient(135deg, var(--card-bg2), var(--card-bg));
+    border: 1px solid var(--accent); border-radius: 16px;
+    padding: 14px 16px; margin-bottom: 18px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .install-banner .ibicon { font-size: 1.8em; }
+  .install-banner .ibtext { flex: 1; font-size: 0.82em; color: var(--muted); }
+  .install-banner .ibtext b { color: var(--text); display: block; margin-bottom: 2px; font-size: 1.05em; }
+  .install-banner button {
+    background: var(--accent); color: #0b1410; border: none; border-radius: 10px;
+    padding: 10px 14px; font-weight: 700; font-size: 0.8em; cursor: pointer; white-space: nowrap;
+  }
+  .install-banner .ibclose {
+    background: none; color: var(--muted); font-size: 1.1em; padding: 4px 6px; margin-left: -4px;
+  }
+  .install-modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200;
+    display: flex; align-items: center; justify-content: center; padding: 24px;
+  }
+  .install-modal {
+    background: var(--card-bg2); border-radius: 18px; padding: 22px; max-width: 360px;
+    text-align: center;
+  }
+  .install-modal h3 { margin: 0 0 10px; }
+  .install-modal .steps { text-align: left; font-size: 0.88em; color: var(--muted); line-height: 1.6; margin: 14px 0; }
+  .install-modal .steps b { color: var(--text); }
+  .install-modal button {
+    background: var(--accent); color: #0b1410; border: none; border-radius: 10px;
+    padding: 12px 20px; font-weight: 700; cursor: pointer; margin-top: 4px;
+  }
+
   .confetti-piece {
     position: fixed; top: -10px; width: 8px; height: 14px; z-index: 99; pointer-events: none;
     animation: confetti-fall linear forwards;
@@ -248,6 +291,7 @@
 <main>
 
   <div class="screen active" id="screen-home">
+    <div id="installBannerSlot"></div>
     <div class="hero-ring-wrap">
       <div class="hero-ring">
         <svg width="160" height="160">
@@ -313,6 +357,12 @@
   </div>
 
   <div class="screen" id="screen-manage">
+    <div class="form-box">
+      <h4>Install this app</h4>
+      <div class="hint-txt">Add Mon Vocabulaire to your home screen like a native app</div>
+      <button id="manageInstallBtn">📲 Add to Home Screen</button>
+    </div>
+
     <div class="form-box">
       <h4>Daily new-word limit</h4>
       <div class="hint-txt">How many brand-new words to introduce per day (keeps 3000-word lists from overwhelming you)</div>
@@ -1012,7 +1062,127 @@ function refreshAll() {
   buildStudyQueue();
   renderWordList();
   renderUnitDatalist();
+  initInstallPrompt();
+  registerServiceWorker();
 })();
+
+// ================= PWA: install prompt + service worker =================
+const STORAGE_INSTALL_DISMISSED = 'ffc_install_dismissed_v1';
+let deferredInstallEvent = null;
+
+function registerServiceWorker() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  }
+}
+
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+
+function isIos() {
+  return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+}
+
+function initInstallPrompt() {
+  if (isStandalone()) return; // already installed, nothing to show
+  if (localStorage.getItem(STORAGE_INSTALL_DISMISSED) === 'true') return;
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallEvent = e;
+    renderInstallBanner('android');
+  });
+
+  if (isIos()) {
+    renderInstallBanner('ios');
+  } else if (!deferredInstallEvent) {
+    // Android/desktop Chrome that hasn't fired beforeinstallprompt yet (or unsupported browser):
+    // show a generic banner that opens instructions as a fallback.
+    renderInstallBanner('generic');
+  }
+}
+
+function renderInstallBanner(kind) {
+  const slot = document.getElementById('installBannerSlot');
+  if (!slot) return;
+  slot.innerHTML = `
+    <div class="install-banner" id="installBanner">
+      <div class="ibicon">📲</div>
+      <div class="ibtext"><b>Install the app</b>Add to your home screen for one-tap access</div>
+      <button id="installNowBtn">Install</button>
+      <button class="ibclose" id="installDismissBtn">✕</button>
+    </div>
+  `;
+  document.getElementById('installDismissBtn').addEventListener('click', () => {
+    localStorage.setItem(STORAGE_INSTALL_DISMISSED, 'true');
+    slot.innerHTML = '';
+  });
+  document.getElementById('installNowBtn').addEventListener('click', () => {
+    if (kind === 'android' && deferredInstallEvent) {
+      deferredInstallEvent.prompt();
+      deferredInstallEvent.userChoice.then(() => { deferredInstallEvent = null; });
+    } else if (kind === 'ios') {
+      showIosInstallModal();
+    } else {
+      showGenericInstallModal();
+    }
+  });
+}
+
+function showIosInstallModal() {
+  const backdrop = document.createElement('div');
+  backdrop.className = 'install-modal-backdrop';
+  backdrop.innerHTML = `
+    <div class="install-modal">
+      <h3>📲 Add to Home Screen</h3>
+      <div class="steps">
+        1. Tap the <b>Share</b> icon (square with an arrow ↑) at the bottom of Safari<br><br>
+        2. Scroll down and tap <b>"Add to Home Screen"</b><br><br>
+        3. Tap <b>Add</b> in the top-right corner
+      </div>
+      <button id="closeInstallModal">Got it</button>
+    </div>
+  `;
+  document.body.appendChild(backdrop);
+  document.getElementById('closeInstallModal').addEventListener('click', () => backdrop.remove());
+  backdrop.addEventListener('click', (e) => { if (e.target === backdrop) backdrop.remove(); });
+}
+
+function manageInstallClick() {
+  if (isStandalone()) {
+    alert('Already installed! Find it on your home screen.');
+    return;
+  }
+  if (deferredInstallEvent) {
+    deferredInstallEvent.prompt();
+    deferredInstallEvent.userChoice.then(() => { deferredInstallEvent = null; });
+  } else if (isIos()) {
+    showIosInstallModal();
+  } else {
+    showGenericInstallModal();
+  }
+}
+document.getElementById('manageInstallBtn').addEventListener('click', manageInstallClick);
+
+function showGenericInstallModal() {
+  const backdrop = document.createElement('div');
+  backdrop.className = 'install-modal-backdrop';
+  backdrop.innerHTML = `
+    <div class="install-modal">
+      <h3>📲 Add to Home Screen</h3>
+      <div class="steps">
+        <b>Chrome / Android:</b> tap the ⋮ menu in the top-right, then choose <b>"Add to Home screen"</b> or <b>"Install app"</b>.<br><br>
+        <b>Desktop Chrome/Edge:</b> click the install icon ⊕ in the address bar.
+      </div>
+      <button id="closeInstallModal">Got it</button>
+    </div>
+  `;
+  document.body.appendChild(backdrop);
+  document.getElementById('closeInstallModal').addEventListener('click', () => backdrop.remove());
+  backdrop.addEventListener('click', (e) => { if (e.target === backdrop) backdrop.remove(); });
+}
+
 </script>
 
 </body>
